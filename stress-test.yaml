@@ -1,9 +1,16 @@
 config:
-  target: "http://ms.wcag-code-sniffer-scanner.reciteme.local/api/v1/scan/create"
+  target: "http://ms.wcag-axe-scanner.reciteme.local/api/v1/scan/create"
   processor: "./get-random-url.js"
   phases:
-    - duration: 15
-      arrivalRate: 50
+    - duration: 1
+      arrivalRate: 12
+  # defaults:
+  #     headers:
+  #         authorization: ""
+    # - duration: 6
+    #   arrivalRate: 0
+    # - duration: 15
+    #   arrivalRate: 1  
 
 environments:
   - name: "development"
@@ -13,12 +20,10 @@ scenarios:
     flow:
       - function: "getRandomUrl"
       - post:
-          url: "http://ms.wcag-code-sniffer-scanner.reciteme.local/api/v1/scan/create"
+          url: "http://ms.wcag-axe-scanner.reciteme.local/api/v1/scan/create"
           json:
-            callback: "http://localhost:3000/scan-results"
+            callback: "http://localhost:3001/scan-results"
             job_id: "1"
             payload:
-              scan_id: "random-uuid"
               tests: []
               scan_url: "{{ scan_url}}"
-              level: 3

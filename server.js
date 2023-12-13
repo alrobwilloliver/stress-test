@@ -1,6 +1,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
 
+const fs = require('fs');
+
 // Create Express app
 const app = express();
 
@@ -22,6 +24,19 @@ const Scan = mongoose.model('Scan', {
   issues: Array,
 });
 
+const Render = mongoose.model('Render', {
+  blob: String,
+  format: String,
+  url: String,
+  coords: Array,
+  status: String
+});
+
+// POST endpoint to receive scan results
+app.get('/scan-results', async (req, res) => {
+  res.sendStatus(200);
+});
+
 // POST endpoint to receive scan results
 app.post('/scan-results', async (req, res) => {
   const { job_id, scan_url, payload } = req.body;
@@ -29,25 +44,24 @@ app.post('/scan-results', async (req, res) => {
   const status = payload.status;
   const issues = payload.issues;
   const date = payload.date;
+  const blob = payload.blob;
   // Save scan results to MongoDB
-  await Scan.create({
-    jobId: job_id,
-    scanUrl: scan_url,
-    date,
-    status,
-    issues,
-  });
+  console.log(job_id)
+  writeArrayToJsonFile(issues, "issues.json");
+
+  // await Scan.create({
+  //   jobId: job_id,
+  //   scanUrl: scan_url,
+  //   date,
+  //   status,
+  //   issues,
+  //   blob
+  // });
 
   res.sendStatus(200);
 });
 
-// Start the server
-const port = 3000;
-app.listen(port, () => {
-  console.log(`Server listening on port ${port}`);
-});
-
-// body of request
+// body of request (scan)
 /*
 status: "completed",
 job_id: job.data.jobId,
@@ -58,3 +72,51 @@ payload: {
     issues: job.data.issues
 },
 */
+
+// POST endpoint to receive render results
+app.post('/scan-results-render', async (req, res) => {
+  const { status, payload, result } = req.body;
+
+  if (payload) {
+    await Render.create({
+      blob: "",
+      url: "",
+      status,
+      coords: []
+    });
+    res.sendStatus(200)
+    return
+  }
+
+  // Save scan results to MongoDB
+  await Render.create({
+    blob: result.blob,
+    url: result.url,
+    status,
+    coords: result.coords
+  });
+
+  res.sendStatus(200);
+});
+
+// Start the server
+const port = 3001;
+app.listen(port, () => {
+  console.log(`Server listening on port ${port}`);
+});
+
+
+function writeArrayToJsonFile(array, fileName) {
+  // Convert the array of objects to a JSON string
+  const jsonString = JSON.stringify(array, null, 2);
+
+  // Write the JSON string to a file
+  fs.writeFile(fileName, jsonString, 'utf8', (err) => {
+      if (err) {
+          console.log("An error occurred while writing JSON Object to File.");
+          return console.log(err);
+      }
+
+      console.log("JSON file has been saved.");
+  });
+}

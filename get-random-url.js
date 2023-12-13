@@ -1,4 +1,5 @@
 function getRandomUrl(context, ee, next) {
+    console.log("getting url")
     const urls = [
         "https://www.google.com",
         "https://www.facebook.com",
@@ -13,7 +14,6 @@ function getRandomUrl(context, ee, next) {
         "https://www.apple.com",
         "https://www.spotify.com",
         "https://www.wikipedia.org",
-        "https://www.reddit.com",
         "https://www.twitch.tv",
         "https://www.pinterest.com",
         "https://www.stackoverflow.com",
